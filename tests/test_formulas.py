@@ -5,7 +5,7 @@ from unittest import TestCase
 
 import xlrd
 
-from .base import from_this_dir
+from .helpers import from_sample
 
 try:
     ascii
@@ -20,7 +20,7 @@ except NameError:
 class TestFormulas(TestCase):
 
     def setUp(self):
-        book = xlrd.open_workbook(from_this_dir('formula_test_sjmachin.xls'))
+        book = xlrd.open_workbook(from_sample('formula_test_sjmachin.xls'))
         self.sheet = book.sheet_by_index(0)
 
     def get_value(self, col, row):
@@ -56,7 +56,7 @@ class TestFormulas(TestCase):
 class TestNameFormulas(TestCase):
 
     def setUp(self):
-        book = xlrd.open_workbook(from_this_dir('formula_test_names.xls'))
+        book = xlrd.open_workbook(from_sample('formula_test_names.xls'))
         self.sheet = book.sheet_by_index(0)
 
     def get_value(self, col, row):
@@ -79,3 +79,12 @@ class TestNameFormulas(TestCase):
 
     def test_choose(self):
         self.assertEqual(self.get_value(1, 6), "'C'")
+
+    def test_evaluate_name_formula_with_invalid_operand(self):
+        book = xlrd.open_workbook(from_sample('invalid_formula.xls'))
+        sheet = book.sheet_by_index(0)
+        cell = sheet.cell(0, 0)
+
+        self.assertEqual(cell.ctype, xlrd.XL_CELL_ERROR)
+        self.assertIn(cell.value, xlrd.error_text_from_code)
+
